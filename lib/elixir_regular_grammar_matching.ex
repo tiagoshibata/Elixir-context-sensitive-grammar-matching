@@ -1,4 +1,19 @@
 defmodule ElixirRegularGrammarMatching do
+  # def generate_from_grammar(grammar, length) do
+  #   {nonterminals, terminals, rules, start} = grammar
+  #   generate_from_grammar(nonterminals, terminals, rules, [start], length, MapSet.new)
+  # end
+
+  # def generate_from_grammar(nonterminals, terminals, rules, [], length, generated_sentences) do
+  #   generated_sentences
+  # end
+
+  # def generate_from_grammar(nonterminals, terminals, rules, [sentence | nonterminal_sentences], length, generated_sentences) do
+  #   filter(apply_rules(nonterminals, terminals, rules, sentence), tamanho)
+  #   generated_sentences = generate_from_grammar(nonterminals, terminals, rules, nonterminal_sentences, length, generated_sentences)
+  #   generate_from_grammar(nonterminals, terminals, rules, nonterminal_sentences, length, generated_sentences)
+  # end
+
   def apply_rules(nonterminals, terminals, rules, sentence) do
     search_nonterminal(sentence, nonterminals) |>
       Enum.flat_map(fn(i) ->
