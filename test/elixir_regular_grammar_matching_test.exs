@@ -7,6 +7,10 @@ defmodule ElixirRegularGrammarMatchingTest do
     assert ElixirRegularGrammarMatching.search_nonterminal("AvOCaDo", "AOCD") == [5, 3, 2, 0]
   end
 
+  test "applies a rule" do
+    assert ElixirRegularGrammarMatching.apply_rule({"A", "a"}, "AA") == ["aA", "Aa", "aa"]
+  end
+
   test "applies an iteration of rules" do
     assert ElixirRegularGrammarMatching.apply_rules("AB",
       [{"A", "aA"}, {"A", "ab"}], "A") ==

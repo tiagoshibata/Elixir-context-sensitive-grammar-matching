@@ -10,6 +10,18 @@ defmodule ElixirRegularGrammarMatching do
       end)
   end
 
+  def apply_rule(rule, state) do
+    {condition, replacement} = rule
+    Enum.reduce(String.split(state, condition), [], fn(part, acc) ->
+      if acc == [] do
+        [part]
+      else
+        Enum.map(acc, &(&1 <> condition <> part)) ++ Enum.map(acc, &(&1 <> replacement <> part))
+      end
+    end) |>
+      Enum.filter(&(&1 != state))
+  end
+
   def apply_rules(nonterminals, rules, state) do
     search_nonterminal(state, nonterminals) |>
       Enum.flat_map(fn(i) ->
