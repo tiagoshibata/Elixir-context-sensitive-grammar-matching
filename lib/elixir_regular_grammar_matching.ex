@@ -1,6 +1,6 @@
 defmodule ElixirRegularGrammarMatching do
-  def search_nonterminal(sentence, nonterminals) do
-    Enum.zip(to_charlist(sentence), 0..String.length(sentence)) |>
+  def search_nonterminal(state, nonterminals) do
+    Enum.zip(to_charlist(state), 0..String.length(state)) |>
       Enum.reduce([], fn({x, index}, acc) ->
         if nonterminals =~ <<x>> do
           [index | acc]
@@ -10,13 +10,13 @@ defmodule ElixirRegularGrammarMatching do
       end)
   end
 
-  def apply_rules(nonterminals, rules, sentence) do
-    search_nonterminal(sentence, nonterminals) |>
+  def apply_rules(nonterminals, rules, state) do
+    search_nonterminal(state, nonterminals) |>
       Enum.flat_map(fn(i) ->
-        nonterminal = String.at(sentence, i)
+        nonterminal = String.at(state, i)
         Enum.reduce(rules, [], fn({condition, rule}, acc) ->
           if condition == nonterminal do
-            [String.slice(sentence, 0, i) <> rule <> String.slice(sentence, i + 1..-1) | acc]
+            [String.slice(state, 0, i) <> rule <> String.slice(state, i + 1..-1) | acc]
           else
             acc
           end
@@ -24,18 +24,18 @@ defmodule ElixirRegularGrammarMatching do
       end)
   end
 
-  def is_terminal(terminals, sentence) do
-    Enum.all?(to_charlist(sentence), &(terminals =~ <<&1>>))
+  def is_terminal(terminals, state) do
+    Enum.all?(to_charlist(state), &(terminals =~ <<&1>>))
   end
 
-  def apply_rules_until_length(nonterminals, terminals, rules, sentence, max_length) do
+  def apply_rules_until_length(nonterminals, terminals, rules, state, max_length) do
     cond do
-      is_terminal(terminals, sentence) ->
-        [sentence]
-      String.length(sentence) > max_length ->
+      is_terminal(terminals, state) ->
+        [state]
+      String.length(state) > max_length ->
         []
       true ->
-        Enum.flat_map(apply_rules(nonterminals, rules, sentence), &(apply_rules_until_length(nonterminals, terminals, rules, &1, max_length))) |>
+        Enum.flat_map(apply_rules(nonterminals, rules, state), &(apply_rules_until_length(nonterminals, terminals, rules, &1, max_length))) |>
           Enum.filter(&(String.length(&1) <= max_length))
     end
   end
