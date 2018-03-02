@@ -25,6 +25,18 @@ defmodule ElixirRegularGrammarMatching do
   end
 
   def is_terminal(terminals, sentence) do
-    Enum.all?(to_charlist(sentence), &(not (terminals =~ <<&1>>)))
+    Enum.all?(to_charlist(sentence), &(terminals =~ <<&1>>))
+  end
+
+  def apply_rules_until_length(nonterminals, terminals, rules, sentence, max_length) do
+    cond do
+      is_terminal(terminals, sentence) ->
+        [sentence]
+      String.length(sentence) > max_length ->
+        []
+      true ->
+        Enum.flat_map(apply_rules(nonterminals, rules, sentence), &(apply_rules_until_length(nonterminals, terminals, rules, &1, max_length))) |>
+          Enum.filter(&(String.length(&1) <= max_length))
+    end
   end
 end
