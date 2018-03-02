@@ -29,4 +29,16 @@ defmodule ElixirRegularGrammarMatchingTest do
       [{"A", "aA"}, {"A", "ab"}], "A", 4) ==
       ["ab", "aab", "aaab"]
   end
+
+  test "checks whether a grammar can generate a sentence" do
+    grammar = {
+      "AB",
+      "ab",
+      [{"A", "ABa"}, {"A", "a"}, {"B", "Bb"}, {"B", "b"}],
+      "A"
+    }
+    assert ElixirRegularGrammarMatching.can_generate_sentence(grammar, "a")
+    assert ElixirRegularGrammarMatching.can_generate_sentence(grammar, "aba")
+    assert ElixirRegularGrammarMatching.can_generate_sentence(grammar, "abbabbba")
+  end
 end

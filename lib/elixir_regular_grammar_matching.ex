@@ -39,4 +39,9 @@ defmodule ElixirRegularGrammarMatching do
           Enum.filter(&(String.length(&1) <= max_length))
     end
   end
+
+  def can_generate_sentence(grammar, sentence) do
+    {nonterminals, terminals, rules, start} = grammar
+    Enum.any?(apply_rules_until_length(nonterminals, terminals, rules, start, String.length(sentence)), &(&1 == sentence))
+  end
 end
