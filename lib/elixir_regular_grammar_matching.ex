@@ -16,7 +16,7 @@ defmodule ElixirRegularGrammarMatching do
         nonterminal = String.at(sentence, i)
         Enum.reduce(rules, [], fn({condition, rule}, acc) ->
           if condition == nonterminal do
-            [String.slice(sentence, 0..i - 1) <> rule <> String.slice(sentence, i + 1..-1) | acc]
+            [String.slice(sentence, 0, i) <> rule <> String.slice(sentence, i + 1..-1) | acc]
           else
             acc
           end
