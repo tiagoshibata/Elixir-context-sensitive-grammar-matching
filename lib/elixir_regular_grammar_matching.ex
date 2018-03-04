@@ -12,8 +12,8 @@ defmodule ElixirRegularGrammarMatching do
 
   def apply_rule(rule, state) do
     {condition, replacement} = rule
-    Enum.reduce(String.split(state, condition), [], fn(part, acc) ->
-      if acc == [] do
+    Enum.reduce(String.split(state, condition), nil, fn(part, acc) ->
+      if is_nil(acc) do
         [part]
       else
         Enum.map(acc, &(&1 <> condition <> part)) ++ Enum.map(acc, &(&1 <> replacement <> part))
