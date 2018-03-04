@@ -2,22 +2,26 @@ defmodule ElixirRegularGrammarMatchingTest do
   use ExUnit.Case
   doctest ElixirRegularGrammarMatching
 
-  test "searches for nonterminals" do
-    assert ElixirRegularGrammarMatching.search_nonterminal("A", "A") == [0]
-    assert ElixirRegularGrammarMatching.search_nonterminal("AvOCaDo", "AOCD") == [5, 3, 2, 0]
+  def assert_have_same_elements(a, b) do
+    assert Enum.sort(a) == Enum.sort(b)
   end
 
   test "applies a rule" do
-    assert ElixirRegularGrammarMatching.apply_rule({"A", "a"}, "AA") == ["aA", "Aa", "aa"]
+    assert_have_same_elements(ElixirRegularGrammarMatching.apply_rule(
+      {"A", "a"}, "AA"),
+      ["aA", "Aa", "aa"])
   end
 
   test "applies an iteration of rules" do
-    assert ElixirRegularGrammarMatching.apply_rules("AB",
-      [{"A", "aA"}, {"A", "ab"}], "A") ==
-      ["ab", "aA"]
-    assert ElixirRegularGrammarMatching.apply_rules("AB",
-      [{"A", "ABa"}, {"A", "b"}, {"B", "Bb"}, {"B", "b"}], "aABa") ==
-      ["aAba", "aABba", "abBa", "aABaBa"]
+    assert_have_same_elements(ElixirRegularGrammarMatching.apply_rules(
+      [{"A", "aA"}, {"A", "ab"}], "A"),
+      ["aA", "ab"])
+    assert_have_same_elements(ElixirRegularGrammarMatching.apply_rules(
+      [{"A", "ABa"}, {"A", "b"}, {"B", "Bb"}, {"B", "b"}], "aABa"),
+      ["aABaBa", "abBa", "aABba", "aAba"])
+    assert_have_same_elements(ElixirRegularGrammarMatching.apply_rules(
+      [{"A", "aAa"}, {"aAa", "BaB"}, {"B", "b"}], "BaAa"),
+      ["BaaAaa", "BBaB", "baAa"])
   end
 
   test "checks whether a sentence has exclusively terminal characters" do
@@ -29,14 +33,17 @@ defmodule ElixirRegularGrammarMatchingTest do
   end
 
   test "applies rules until an specific length" do
-    assert ElixirRegularGrammarMatching.apply_rules_until_length("AB", "ab",
-      [{"A", "aA"}, {"A", "ab"}], "A", 4) ==
-      ["ab", "aab", "aaab"]
+    assert ElixirRegularGrammarMatching.apply_rules_until_length("a", [], "aa", 1) == MapSet.new
+    assert ElixirRegularGrammarMatching.apply_rules_until_length("ab",
+        [{"A", "aA"}, {"A", "ab"}], "A", 4) ==
+      MapSet.new(["aaab", "aab", "ab"])
+    assert ElixirRegularGrammarMatching.apply_rules_until_length("ab",
+      [{"A", "a"}, {"A", "aAa"}, {"aAa", "BaB"}, {"B", "b"}, {"B", "Bb"}], "A", 5) ==
+      MapSet.new(["a", "aaa", "ababa", "bab", "bbab", "babb", "bbbab", "babbb", "bbabb", "aaaaa"])
   end
 
   test "checks whether a grammar can generate a sentence" do
     grammar = {
-      "AB",
       "ab",
       [{"A", "ABa"}, {"A", "a"}, {"B", "Bb"}, {"B", "b"}],
       "A"
@@ -47,14 +54,19 @@ defmodule ElixirRegularGrammarMatchingTest do
     assert not ElixirRegularGrammarMatching.can_generate_sentence(grammar, "ba")
     assert not ElixirRegularGrammarMatching.can_generate_sentence(grammar, "abab")
     context_sensitive_grammar = {
-      "AB",
       "ab",
       [{"A", "aAa"}, {"aAa", "BaB"}, {"B", "Bb"}, {"B", "b"}],
       "A"
     }
     assert ElixirRegularGrammarMatching.can_generate_sentence(context_sensitive_grammar, "bab")
     assert ElixirRegularGrammarMatching.can_generate_sentence(context_sensitive_grammar, "aabbbabaa")
-    assert ElixirRegularGrammarMatching.can_generate_sentence(context_sensitive_grammar, "aaabbbbbabbaaa")
+    assert ElixirRegularGrammarMatching.can_generate_sentence(context_sensitive_grammar, "aaabbabaaa")
     assert not ElixirRegularGrammarMatching.can_generate_sentence(context_sensitive_grammar, "aabaaa")
+    context_sensitive_grammar = {
+      "ab",
+      [{"A", "B"}, {"B", "A"}, {"A", "a"}],
+      "A"
+    }
+    assert ElixirRegularGrammarMatching.can_generate_sentence(context_sensitive_grammar, "aaa")
   end
 end

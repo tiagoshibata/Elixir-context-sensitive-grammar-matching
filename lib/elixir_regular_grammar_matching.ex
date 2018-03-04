@@ -1,15 +1,4 @@
 defmodule ElixirRegularGrammarMatching do
-  def search_nonterminal(state, nonterminals) do
-    Enum.zip(to_charlist(state), 0..String.length(state)) |>
-      Enum.reduce([], fn({x, index}, acc) ->
-        if nonterminals =~ <<x>> do
-          [index | acc]
-        else
-          acc
-        end
-      end)
-  end
-
   def apply_rule(rule, state) do
     {condition, replacement} = rule
     Enum.reduce(String.split(state, condition), nil, fn(part, acc) ->
@@ -22,38 +11,28 @@ defmodule ElixirRegularGrammarMatching do
       Enum.filter(&(&1 != state))
   end
 
-  def apply_rules(nonterminals, rules, state) do
-    search_nonterminal(state, nonterminals) |>
-      Enum.flat_map(fn(i) ->
-        nonterminal = String.at(state, i)
-        Enum.reduce(rules, [], fn({condition, rule}, acc) ->
-          if condition == nonterminal do
-            [String.slice(state, 0, i) <> rule <> String.slice(state, i + 1..-1) | acc]
-          else
-            acc
-          end
-        end)
-      end)
+  def apply_rules(rules, state) do
+    Enum.flat_map(rules, &(apply_rule(&1, state)))
   end
 
   def is_terminal(terminals, state) do
     Enum.all?(to_charlist(state), &(terminals =~ <<&1>>))
   end
 
-  def apply_rules_until_length(nonterminals, terminals, rules, state, max_length) do
+  def apply_rules_until_length(terminals, rules, state, max_length) do
     cond do
-      is_terminal(terminals, state) ->
-        [state]
       String.length(state) > max_length ->
-        []
+        MapSet.new
+      is_terminal(terminals, state) ->
+        MapSet.new([state])
       true ->
-        Enum.flat_map(apply_rules(nonterminals, rules, state), &(apply_rules_until_length(nonterminals, terminals, rules, &1, max_length))) |>
-          Enum.filter(&(String.length(&1) <= max_length))
+        Enum.reduce(apply_rules(rules, state), MapSet.new,
+          &(MapSet.union(&2, apply_rules_until_length(terminals, rules, &1, max_length))))
     end
   end
 
   def can_generate_sentence(grammar, sentence) do
-    {nonterminals, terminals, rules, start} = grammar
-    Enum.any?(apply_rules_until_length(nonterminals, terminals, rules, start, String.length(sentence)), &(&1 == sentence))
+    {terminals, rules, start} = grammar
+    MapSet.member?(apply_rules_until_length(terminals, rules, start, String.length(sentence)), sentence)
   end
 end
