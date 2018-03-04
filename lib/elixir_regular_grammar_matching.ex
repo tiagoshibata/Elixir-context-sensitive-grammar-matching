@@ -35,11 +35,13 @@ defmodule ElixirRegularGrammarMatching do
   end
 
   def apply_rules_until_length(terminals, rules, state, max_length) do
-    elem(apply_rules_until_length(terminals, rules, {MapSet.new([state]), MapSet.new}, max_length), 1)
+    apply_rules_until_length(terminals, rules, {MapSet.new([state]), MapSet.new}, max_length)
+    |> elem(1)
   end
 
   def can_generate_sentence(grammar, sentence) do
     {terminals, rules, start} = grammar
-    MapSet.member?(apply_rules_until_length(terminals, rules, start, String.length(sentence)), sentence)
+    apply_rules_until_length(terminals, rules, start, String.length(sentence))
+    |> MapSet.member?(sentence)
   end
 end
