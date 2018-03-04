@@ -1,14 +1,14 @@
 defmodule ElixirRegularGrammarMatching do
   def apply_rule(rule, state) do
     {condition, replacement} = rule
-    Enum.reduce(String.split(state, condition), nil, fn(part, acc) ->
-      if is_nil(acc) do
-        [part]
-      else
-        Enum.map(acc, &(&1 <> condition <> part)) ++ Enum.map(acc, &(&1 <> replacement <> part))
-      end
-    end)
-    |> Enum.filter(&(&1 != state))
+    case String.split(state, condition, parts: 2) do
+      [left, right] ->
+        {head, tail} = String.split_at(condition, 1)
+        Enum.map(apply_rule(rule, right), &(left <> replacement <> &1))
+        ++ Enum.map(apply_rule(rule, tail <> right), &(left <> head <> &1))
+      [_] ->
+        [state]
+    end
   end
 
   def apply_rules(rules, state) do

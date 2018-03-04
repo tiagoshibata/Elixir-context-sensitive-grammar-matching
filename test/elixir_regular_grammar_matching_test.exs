@@ -3,28 +3,34 @@ defmodule ElixirRegularGrammarMatchingTest do
   doctest ElixirRegularGrammarMatching
 
   def assert_have_same_elements(a, b) do
-    assert Enum.sort(a) == Enum.sort(b)
+    assert MapSet.new(a) == MapSet.new(b)
   end
 
   test "applies a rule" do
     assert_have_same_elements(ElixirRegularGrammarMatching.apply_rule(
       {"A", "a"}, "AA"),
-      ["aA", "Aa", "aa"])
+      ["AA", "aA", "Aa", "aa"])
     assert_have_same_elements(ElixirRegularGrammarMatching.apply_rule(
       {"AA", "aa"}, "AAA"),
-      ["aaA", "AAa"])
+      ["AAA", "aaA", "Aaa"])
+    assert_have_same_elements(ElixirRegularGrammarMatching.apply_rule(
+      {"A", "a"}, ""),
+      [""])
+    assert_have_same_elements(ElixirRegularGrammarMatching.apply_rule(
+      {"ABA", "a"}, "ABABA"),
+      ["ABABA", "aBA", "ABa"])
   end
 
   test "applies an iteration of rules" do
     assert_have_same_elements(ElixirRegularGrammarMatching.apply_rules(
       [{"A", "aA"}, {"A", "ab"}], "A"),
-      ["aA", "ab"])
+      ["A", "aA", "ab"])
     assert_have_same_elements(ElixirRegularGrammarMatching.apply_rules(
       [{"A", "ABa"}, {"A", "b"}, {"B", "Bb"}, {"B", "b"}], "aABa"),
-      ["aABaBa", "abBa", "aABba", "aAba"])
+      ["aABa", "aABaBa", "abBa", "aABba", "aAba"])
     assert_have_same_elements(ElixirRegularGrammarMatching.apply_rules(
       [{"A", "aAa"}, {"aAa", "BaB"}, {"B", "b"}], "BaAa"),
-      ["BaaAaa", "BBaB", "baAa"])
+      ["BaAa", "BaaAaa", "BBaB", "baAa"])
   end
 
   test "applies rules until an specific length" do
