@@ -10,6 +10,9 @@ defmodule ElixirRegularGrammarMatchingTest do
     assert_have_same_elements(ElixirRegularGrammarMatching.apply_rule(
       {"A", "a"}, "AA"),
       ["aA", "Aa", "aa"])
+    assert_have_same_elements(ElixirRegularGrammarMatching.apply_rule(
+      {"AA", "aa"}, "AAA"),
+      ["aaA", "AAa"])
   end
 
   test "applies an iteration of rules" do
