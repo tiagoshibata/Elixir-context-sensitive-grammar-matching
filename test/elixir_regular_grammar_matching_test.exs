@@ -34,9 +34,8 @@ defmodule ElixirRegularGrammarMatchingTest do
   end
 
   test "applies rules until an specific length" do
-    assert ElixirRegularGrammarMatching.apply_rules_until_length("a", [], "aa", 1) == MapSet.new(["aa"])
     assert ElixirRegularGrammarMatching.apply_rules_until_length("ab",
-        [{"A", "aA"}, {"A", "ab"}], "A", 4) ==
+      [{"A", "aA"}, {"A", "ab"}], "A", 4) ==
       MapSet.new(["A", "aA", "aaA", "aaaA", "aaab", "aab", "ab"])
     assert ElixirRegularGrammarMatching.apply_rules_until_length("ab",
       [{"A", "a"}, {"A", "aAa"}, {"aAa", "bAb"}], "A", 5) ==
