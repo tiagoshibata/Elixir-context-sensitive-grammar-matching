@@ -24,14 +24,6 @@ defmodule ElixirRegularGrammarMatchingTest do
       ["BaaAaa", "BBaB", "baAa"])
   end
 
-  test "checks whether a sentence has exclusively terminal characters" do
-    assert ElixirRegularGrammarMatching.is_terminal("ab", "ab")
-    assert ElixirRegularGrammarMatching.is_terminal("", "")
-    assert not ElixirRegularGrammarMatching.is_terminal("", "ab")
-    assert not ElixirRegularGrammarMatching.is_terminal("ab", "A")
-    assert not ElixirRegularGrammarMatching.is_terminal("ab", "aAb")
-  end
-
   test "applies rules until an specific length" do
     assert ElixirRegularGrammarMatching.apply_rules_until_length("a", [], "aa", 1) == MapSet.new(["aa"])
     assert ElixirRegularGrammarMatching.apply_rules_until_length("ab",

@@ -15,10 +15,6 @@ defmodule ElixirRegularGrammarMatching do
     Enum.flat_map(rules, &(apply_rule(&1, state)))
   end
 
-  def is_terminal(terminals, state) do
-    Enum.all?(to_charlist(state), &(terminals =~ <<&1>>))
-  end
-
   @doc """
   Recursively applies rules until `max_length` length.
 
