@@ -33,13 +33,16 @@ defmodule ElixirRegularGrammarMatchingTest do
   end
 
   test "applies rules until an specific length" do
-    assert ElixirRegularGrammarMatching.apply_rules_until_length("a", [], "aa", 1) == MapSet.new
+    assert ElixirRegularGrammarMatching.apply_rules_until_length("a", [], "aa", 1) == MapSet.new(["aa"])
     assert ElixirRegularGrammarMatching.apply_rules_until_length("ab",
         [{"A", "aA"}, {"A", "ab"}], "A", 4) ==
-      MapSet.new(["aaab", "aab", "ab"])
+      MapSet.new(["A", "aA", "aaA", "aaaA", "aaab", "aab", "ab"])
     assert ElixirRegularGrammarMatching.apply_rules_until_length("ab",
-      [{"A", "a"}, {"A", "aAa"}, {"aAa", "BaB"}, {"B", "b"}, {"B", "Bb"}], "A", 5) ==
-      MapSet.new(["a", "aaa", "ababa", "bab", "bbab", "babb", "bbbab", "babbb", "bbabb", "aaaaa"])
+      [{"A", "a"}, {"A", "aAa"}, {"aAa", "bAb"}], "A", 5) ==
+      MapSet.new(["A", "a", "aAa", "aaAaa", "aaa", "aaaaa", "abAba", "ababa", "bAb", "baAab", "baaab", "bab", "bbAbb", "bbabb"])
+    assert ElixirRegularGrammarMatching.apply_rules_until_length("ab",
+      [{"A", "B"}, {"B", "A"}, {"A", "a"}], "A", 3) ==
+      MapSet.new(["A", "B", "a"])
   end
 
   test "checks whether a grammar can generate a sentence" do
@@ -67,6 +70,7 @@ defmodule ElixirRegularGrammarMatchingTest do
       [{"A", "B"}, {"B", "A"}, {"A", "a"}],
       "A"
     }
-    assert ElixirRegularGrammarMatching.can_generate_sentence(context_sensitive_grammar, "aaa")
+    assert ElixirRegularGrammarMatching.can_generate_sentence(context_sensitive_grammar, "a")
+    assert not ElixirRegularGrammarMatching.can_generate_sentence(context_sensitive_grammar, "aaa")
   end
 end

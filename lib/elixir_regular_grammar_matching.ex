@@ -7,8 +7,8 @@ defmodule ElixirRegularGrammarMatching do
       else
         Enum.map(acc, &(&1 <> condition <> part)) ++ Enum.map(acc, &(&1 <> replacement <> part))
       end
-    end) |>
-      Enum.filter(&(&1 != state))
+    end)
+    |> Enum.filter(&(&1 != state))
   end
 
   def apply_rules(rules, state) do
@@ -19,16 +19,27 @@ defmodule ElixirRegularGrammarMatching do
     Enum.all?(to_charlist(state), &(terminals =~ <<&1>>))
   end
 
-  def apply_rules_until_length(terminals, rules, state, max_length) do
-    cond do
-      String.length(state) > max_length ->
-        MapSet.new
-      is_terminal(terminals, state) ->
-        MapSet.new([state])
-      true ->
-        Enum.reduce(apply_rules(rules, state), MapSet.new,
-          &(MapSet.union(&2, apply_rules_until_length(terminals, rules, &1, max_length))))
+  @doc """
+  Recursively applies rules until `max_length` length.
+
+  `states` is a list keeping track of all sentencial forms and sentences.
+  Each item is a tuple `{pending, state}`, where `pending` is `true` if this
+  sentencial form has to be visited, and `state` is a string with the sentence
+  or sentencial form.
+  """
+  def apply_rules_until_length(terminals, rules, {states, visited}, max_length) do
+    not_visited = MapSet.difference(states, visited)
+    case Enum.fetch(not_visited, 0) do
+      {:ok, state} ->
+        rules_applied = Enum.filter(apply_rules(rules, state), &(String.length(&1) <= max_length))
+        apply_rules_until_length(terminals, rules, {MapSet.union(states, MapSet.new(rules_applied)), MapSet.put(visited, state)}, max_length)
+      :error ->
+        {states, visited}
     end
+  end
+
+  def apply_rules_until_length(terminals, rules, state, max_length) do
+    elem(apply_rules_until_length(terminals, rules, {MapSet.new([state]), MapSet.new}, max_length), 1)
   end
 
   def can_generate_sentence(grammar, sentence) do
